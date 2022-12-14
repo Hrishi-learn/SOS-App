@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Sos Application</string>
+    <string name="add_contacts">ADD CONTACTS</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="enter_phone_no">Enter Phone no.</string>
+</resources>
