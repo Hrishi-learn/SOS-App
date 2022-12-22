@@ -9,11 +9,13 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -66,7 +68,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onDestroy() {
         val broadcastIntent = Intent()
-        broadcastIntent.action = "restartservice"
+        broadcastIntent.action = "restartable"
         broadcastIntent.setClass(this, ReactivateService::class.java)
         this.sendBroadcast(broadcastIntent)
         super.onDestroy()
@@ -154,10 +156,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAllRecords(arrayList:ArrayList<ContactEntity>){
-        val adapter=ItemAdapter(arrayList)
+        val adapter=ItemAdapter(arrayList) { id ->
+            deleteContact(id)
+        }
         binding?.rvList?.adapter=adapter
         binding?.rvList?.layoutManager=LinearLayoutManager(this)
     }
+    private fun deleteContact(id:Int){
+        val contactDao=(application as ContactsApp).db.ContactsDao()
+        lifecycleScope.launch {
+            contactDao.delete(ContactEntity(id))
+        }
+    }
+
     private fun showSettingsDialog(){
         val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
 

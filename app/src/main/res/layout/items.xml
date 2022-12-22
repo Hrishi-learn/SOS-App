@@ -28,5 +28,10 @@
         tools:text="Phone no."
         android:layout_margin="10dp"
         />
-
+    <ImageView
+        android:layout_width="28dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/delete_icon"
+        android:src="@drawable/delete_icon"
+        />
 </LinearLayout>

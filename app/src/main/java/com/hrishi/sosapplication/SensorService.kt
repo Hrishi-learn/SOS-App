@@ -10,8 +10,7 @@ import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.Location
-import android.os.Build
-import android.os.IBinder
+import android.os.*
 import android.telephony.SmsManager
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -50,6 +49,7 @@ class SensorService: Service(){
             @SuppressLint("MissingPermission")
             override fun onShake(count: Int) {
                 if(count>2){
+                    vibrate()
                     val contactsDao=(application as ContactsApp).db.ContactsDao()
                     fusedLocationProvider.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY,null)
                         .addOnSuccessListener {
@@ -73,6 +73,20 @@ class SensorService: Service(){
             }
         })
         mSensorManager?.registerListener(shakeDetector,mAccelerometer,SensorManager.SENSOR_DELAY_UI)
+    }
+    private fun vibrate(){
+        if(Build.VERSION.SDK_INT>=31){
+            val vibratorManager=getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val vibrator=vibratorManager.defaultVibrator
+            vibrator.vibrate(VibrationEffect.createOneShot(500,VibrationEffect.DEFAULT_AMPLITUDE))
+        }else{
+            val vibrator=getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if(Build.VERSION.SDK_INT>=26){
+                vibrator.vibrate(VibrationEffect.createOneShot(500,VibrationEffect.DEFAULT_AMPLITUDE))
+            }else{
+                vibrator.vibrate(500)
+            }
+        }
     }
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startMyOwnForeGround(){
@@ -118,7 +132,7 @@ class SensorService: Service(){
     }
     override fun onDestroy() {
         val broadcastIntent = Intent()
-        broadcastIntent.action = "restartservice"
+        broadcastIntent.action = "restartable"
         broadcastIntent.setClass(this, ReactivateService::class.java)
         this.sendBroadcast(broadcastIntent)
         super.onDestroy()
